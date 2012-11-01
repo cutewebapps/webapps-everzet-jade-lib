@@ -1,0 +1,8 @@
+{
+    "name"    : "webapps-everzet-jade-lib",
+    "version" : "0.1.0",
+    "classes" : [ "Everzet" ],
+    "deps"    : [ 
+        "webapps-framework-lib" 
+    ]
+}
