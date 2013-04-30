@@ -21,6 +21,22 @@ class Everzet_Jade_View extends App_View
         return 'jade';
     }
     
+    
+    public function errorHandler( $str )
+    {
+        $error = error_get_last();
+        if ($error && $error["type"] == E_USER_ERROR || $error["type"] == E_ERROR) {
+            
+            $confException = App_Application::getInstance()->getConfig()->exceptions;
+            if ( is_object( $confException ) && $confException->render ) {
+                // if normal fatal error rendering is configured
+                return file_get_contents( CWA_APPLICATION_DIR.'/'.$confException->render  );
+            }
+            return ( "\nJade fatal error: $error[message] in $error[file] on line $error[line]\n" );
+        }
+        return $str;
+    }
+    
     public function render()
     {
         $strCacheDir = App_Application::getInstance()->getConfig()->jade_dir;
@@ -43,25 +59,29 @@ class Everzet_Jade_View extends App_View
         $parser = new Everzet_Jade_Parser(new Everzet_Jade_Lexer_Lexer());
         $jade   = new Everzet_Jade_Jade($parser, $dumper, $strCacheDir );
 
-        ob_start();
+        ob_start( array( $this, 'errorHandler' ) );
         // Parse a template (both string & file containers)
 
         $arrPaths = $this->getPath();
         if ( !is_array( $arrPaths )) $arrPaths = array( $arrPaths );
-
         $bSuccess = false;
-        foreach ( $arrPaths as $strPath ) {
-            if ( file_exists( $strPath ) ) {
-                require $jade->cache( $strPath );$bSuccess = true; break;
+        try{
+            foreach ( $arrPaths as $strPath ) {
+                if ( file_exists( $strPath ) ) {
+                    require $jade->cache( $strPath );$bSuccess = true; break;
+                }
             }
+            if ( !$bSuccess ) {
+                throw new App_Exception( 'Jade template was not found at '.implode( ",", $arrPaths ));
+            }
+            $this->_strContents = ob_get_contents();
+            ob_end_clean();
+        } catch( Exception $e ) {
+            ob_end_clean();
+            $this->_strContents = '';
+            throw $e;
         }
-        if ( !$bSuccess ) {
-            throw new App_Exception( 'Jade template was not found at '.implode( ",", $arrPaths ));
-        }
-
         
-        $this->_strContents = ob_get_contents();
-        ob_end_clean();
         return $this->_strContents;        
     }
 }

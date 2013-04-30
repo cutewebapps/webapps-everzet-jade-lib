@@ -18,6 +18,22 @@ class Everzet_Jade_Layout extends App_Layout
         return 'jade';
     }
     
+    
+    public function errorHandler( $str )
+    {
+        $error = error_get_last();
+        if ($error && $error["type"] == E_USER_ERROR || $error["type"] == E_ERROR) {
+            
+            $confException = App_Application::getInstance()->getConfig()->exceptions;
+            if ( is_object( $confException ) && $confException->render ) {
+                // if normal fatal error rendering is configured
+                return file_get_contents( CWA_APPLICATION_DIR.'/'.$confException->render  );
+            }
+            return ( "\nJade fatal error: $error[message] in $error[file] on line $error[line]\n" );
+        }
+        return $str;
+    }    
+    
     /* view must be initialized */
     public function render()
     {
@@ -40,7 +56,7 @@ class Everzet_Jade_Layout extends App_Layout
             $parser = new Everzet_Jade_Parser(new Everzet_Jade_Lexer_Lexer());
             $jade   = new Everzet_Jade_Jade($parser, $dumper, $strCacheDir );
 
-            ob_start();
+            ob_start( array( $this, 'errorHandler' ));
             // Parse a template (both string & file containers)
             
             $arrPaths = $this->getPath();
