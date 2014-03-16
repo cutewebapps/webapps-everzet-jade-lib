@@ -15,11 +15,11 @@ function check_indentation( $strFileName )
 		}
 		if ( substr( $sRow, $nSpaces, 1 ) == "\t" ) {
 			echo "ROW #$iRow: tabulation met\n";
-			$nErrors ++
+			$nErrors ++;
 		}
 		if ( $nSpaces % 4 == 0 ) {
 			echo "ROW #$iRow: ".$nSpaces."\n";
-			$nErrors ++
+			$nErrors ++;
 		}
 	}
 	if ( $nErrors == "" )

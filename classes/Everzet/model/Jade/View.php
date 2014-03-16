@@ -72,7 +72,12 @@ class Everzet_Jade_View extends App_View
                 }
             }
             if ( !$bSuccess ) {
-                throw new App_Exception( 'Jade template was not found at '.implode( ",", $arrPaths ));
+                if ( $this->getInflection( 'format') == 'json' ) {
+                    echo json_encode( ( is_object($this->object) ? $this->object->toArray() : array() ) 
+                        + array('errors' => $this->arrError, 'message' => $this->lstMessages ) );
+                } else {
+                    throw new App_Exception( 'Jade template was not found at '.implode( ",", $arrPaths ));
+                }
             }
             $this->_strContents = ob_get_contents();
             ob_end_clean();
