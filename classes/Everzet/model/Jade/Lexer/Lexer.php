@@ -220,7 +220,7 @@ class Everzet_Jade_Lexer_Lexer implements Everzet_Jade_Lexer_LexerInterface
      */
     protected function scanTag()
     {
-        return $this->scanInput('/^(\w[:-\w]*)/', 'tag');
+        return $this->scanInput('/^(\w[:\-\w]*)/', 'tag');
     }
 
     /**
